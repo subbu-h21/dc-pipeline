@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+aiosqlite
+python-multipart
+python-dotenv
+aiofiles
+Pillow
+openai
+rapidfuzz

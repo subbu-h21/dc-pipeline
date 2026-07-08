@@ -1,0 +1,16 @@
+.env
+backend/staff_names.txt
+backend/venv/
+backend/__pycache__/
+**/__pycache__/
+*.pyc
+backend/dc_pipeline.db
+backend/dc_pipeline.db-shm
+backend/dc_pipeline.db-wal
+backend/dc_pipeline_photos/
+frontend/node_modules/
+frontend/dist/
+
+.claude/
+
+/supplier_names.csv
