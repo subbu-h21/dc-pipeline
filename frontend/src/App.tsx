@@ -156,20 +156,18 @@ export default function App() {
             bg="#fffbeb"
           />
           <HubCard
-            href={EVENTS_URL}
+            href={DPS_URL}
             icon={
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                <line x1="16" y1="2" x2="16" y2="6"/>
-                <line x1="8" y1="2" x2="8" y2="6"/>
-                <line x1="3" y1="10" x2="21" y2="10"/>
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
               </svg>
             }
-            title="Events"
-            sub="Calendar"
-            color="#db2777"
-            bg="#fdf2f8"
+            title="Distributor Product Search"
+            sub="Search"
+            color="#0891b2"
+            bg="#ecfeff"
           />
           <HubCard
             href={ORDERS_URL}
@@ -187,18 +185,20 @@ export default function App() {
             bg="#eef2ff"
           />
           <HubCard
-            href={DPS_URL}
+            href={EVENTS_URL}
             icon={
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="8"/>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
               </svg>
             }
-            title="Distributor Product Search"
-            sub="Search"
-            color="#0891b2"
-            bg="#ecfeff"
+            title="Events"
+            sub="Calendar"
+            color="#db2777"
+            bg="#fdf2f8"
           />
         </div>
       </div>
