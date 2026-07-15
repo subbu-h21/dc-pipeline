@@ -26,6 +26,7 @@ from routes.employees import router as employees_router
 from routes.photos import router as photos_router
 from routes.stage1 import router as stage1_router
 from routes.stage2 import router as stage2_router
+from routes.stage3 import router as stage3_router
 from routes.suppliers import router as suppliers_router
 
 log = logging.getLogger(__name__)
@@ -45,6 +46,7 @@ app.include_router(suppliers_router)
 app.include_router(employees_router)
 app.include_router(stage1_router)
 app.include_router(stage2_router)
+app.include_router(stage3_router)
 app.include_router(photos_router)
 app.include_router(dashboard_router)
 

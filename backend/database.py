@@ -49,6 +49,17 @@ CREATE TABLE IF NOT EXISTS dc_photos (
     uploaded_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     uploaded_by   INTEGER REFERENCES employees(id)
 );
+
+CREATE TABLE IF NOT EXISTS stage3_entries (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    dc_number    TEXT    NOT NULL,
+    supplier_id  INTEGER NOT NULL REFERENCES suppliers(id),
+    employee_id  INTEGER REFERENCES employees(id),
+    reference_no TEXT,
+    done_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE(dc_number, supplier_id)
+);
 """
 
 

@@ -64,8 +64,10 @@ async def dashboard_summary(
         )
 
         # Employee leaderboard — flat scoring: stage1_by = 1pt, stage2_by = 2pts,
-        # summed independently per employee (same person doing both on one record
-        # naturally gets 1+2=3 — no special-casing needed).
+        # stage3 (dc-entry-automation CRM save, tracked separately in
+        # stage3_entries — see routes/stage3.py) = 3pts, summed independently
+        # per employee (same person doing all three on one DC naturally gets
+        # 1+2+3=6 — no special-casing needed).
         cur = await db.execute(
             """SELECT e.name,
                       COALESCE((
@@ -77,21 +79,28 @@ async def dashboard_summary(
                           SELECT COUNT(*) * 2.0 FROM dc_records
                           WHERE stage2_by = e.id AND status = 'stage2'
                           AND date(created_at) BETWEEN ? AND ?
-                      ), 0) AS stage2_pts
+                      ), 0) AS stage2_pts,
+                      COALESCE((
+                          SELECT COUNT(*) * 3.0 FROM stage3_entries
+                          WHERE employee_id = e.id
+                          AND date(done_at) BETWEEN ? AND ?
+                      ), 0) AS stage3_pts
                FROM employees e""",
-            (from_date, to_date, from_date, to_date),
+            (from_date, to_date, from_date, to_date, from_date, to_date),
         )
         leaderboard = []
         for row in await cur.fetchall():
             s1 = float(row["stage1_pts"] or 0)
             s2 = float(row["stage2_pts"] or 0)
-            total = round(s1 + s2, 1)
+            s3 = float(row["stage3_pts"] or 0)
+            total = round(s1 + s2 + s3, 1)
             if total > 0:
                 leaderboard.append(
                     {
                         "name": row["name"],
                         "stage1_pts": s1,
                         "stage2_pts": round(s2, 1),
+                        "stage3_pts": round(s3, 1),
                         "total_pts": total,
                     }
                 )

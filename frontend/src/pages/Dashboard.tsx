@@ -8,6 +8,7 @@ interface LeaderboardEntry {
   name: string
   stage1_pts: number
   stage2_pts: number
+  stage3_pts: number
   total_pts: number
 }
 
@@ -227,6 +228,7 @@ export default function Dashboard() {
                         <th>Name</th>
                         <th style={{ textAlign: 'center' }}>Stage 1</th>
                         <th style={{ textAlign: 'center' }}>Stage 2</th>
+                        <th style={{ textAlign: 'center' }}>Stage 3</th>
                         <th style={{ textAlign: 'center' }}>Total</th>
                       </tr>
                     </thead>
@@ -242,6 +244,9 @@ export default function Dashboard() {
                           </td>
                           <td style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
                             {row.stage2_pts}
+                          </td>
+                          <td style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+                            {row.stage3_pts}
                           </td>
                           <td style={{ textAlign: 'center' }}>
                             <strong style={{ color: 'var(--accent)', fontSize: 15 }}>
