@@ -39,7 +39,7 @@ This will automatically:
 - Install all backend Python dependencies
 - Install all frontend Node dependencies
 - Create `backend\.env` from `.env.example`
-- Create `backend\staff_names.txt` from `staff_names.example.txt` (placeholder names)
+- Create `backend\staff_names.csv` from `staff_names.example.csv` (placeholder names)
 
 ### Step 4 — Add your real data
 
@@ -55,9 +55,11 @@ Three things are deliberately **not** in the repo (real business/personal data, 
    ```
    > Get an OpenRouter key at https://openrouter.ai/keys
 
-2. **`backend\staff_names.txt`** — replace the placeholder names with your real staff list, one full name per line. This seeds the `employees` table on first run.
+2. **`backend\staff_names.csv`** — replace the placeholder names with your real staff list. Needs a header row with an `Employee Name` column. This seeds the `employees` table on first run.
 
 3. **`supplier_names.csv`** — place your real distributor list at the **repo root** (`dc-pipeline\supplier_names.csv`, next to `backend/` and `frontend/`), matching the default `STAGE3_SUPPLIER_CSV=../supplier_names.csv` above. Needs a header row with a `Supplier Name` column. This seeds the `suppliers` table on first run.
+
+> Both lists can also be topped up later without touching these files or restarting the backend — see **Update Employees & Suppliers** in the app (DC Checking & Verification → landing screen), which lets you upload a `.csv` directly and appends any new names to the database.
 
 **About the database:** you don't create it manually. `backend/dc_pipeline.db` is generated automatically the first time the backend starts — the schema is applied idempotently on every startup, and `suppliers`/`employees` are seeded *once*, from the two files above, only if those tables are still empty. So steps 2 and 3 above must be done **before** the first launch; if you launch first and add the files after, restart the backend once and it'll still pick them up as long as those tables ended up empty on the first pass. If they didn't (e.g. you launched, it seeded 0 suppliers because the CSV was missing, and you want to reseed), delete `backend/dc_pipeline.db` and start again.
 
@@ -91,17 +93,18 @@ dc-pipeline/
 │   ├── seed.py                  # Seeds suppliers/employees once, if tables are empty
 │   ├── requirements.txt
 │   ├── .env.example             # Copy this to .env and fill in keys
-│   ├── staff_names.example.txt  # Copy this to staff_names.txt and fill in real names
+│   ├── staff_names.example.csv  # Copy this to staff_names.csv and fill in real names
 │   ├── routes/
 │   │   ├── stage1.py            # POST /stage1/save, /stage1/extract — checking
 │   │   ├── stage2.py            # POST /stage2/save — verification
 │   │   ├── photos.py            # Photo upload/delete
-│   │   ├── suppliers.py         # GET /suppliers
-│   │   ├── employees.py         # GET /employees
+│   │   ├── suppliers.py         # GET /suppliers, POST /suppliers/upload (bulk-add via CSV)
+│   │   ├── employees.py         # GET /employees, POST /employees/upload (bulk-add via CSV)
 │   │   └── dashboard.py         # PIN-gated leaderboard/stats
 │   └── services/
 │       ├── client.py            # OpenAI SDK client → OpenRouter
-│       └── extraction.py        # Invoice photo → dc_number/supplier/item_count
+│       ├── extraction.py        # Invoice photo → dc_number/supplier/item_count
+│       └── csv_import.py        # Shared CSV name-column parser for the upload endpoints
 ├── frontend/
 │   └── src/
 │       ├── App.tsx              # Hub/landing page

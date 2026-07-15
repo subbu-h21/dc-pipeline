@@ -32,14 +32,14 @@ if not exist .env (
     echo.
 )
 
-:: Create staff_names.txt if it doesn't exist
-if not exist staff_names.txt (
-    copy staff_names.example.txt staff_names.txt
-    echo Created backend\staff_names.txt from staff_names.example.txt
-    echo  IMPORTANT: Edit backend\staff_names.txt with your real staff list ^(one name per line^).
+:: Create staff_names.csv if it doesn't exist
+if not exist staff_names.csv (
+    copy staff_names.example.csv staff_names.csv
+    echo Created backend\staff_names.csv from staff_names.example.csv
+    echo  IMPORTANT: Edit backend\staff_names.csv with your real staff list ^(one "Employee Name" column, one name per row^).
     echo.
 ) else (
-    echo backend\staff_names.txt already exists, skipping.
+    echo backend\staff_names.csv already exists, skipping.
     echo.
 )
 

@@ -52,7 +52,7 @@ const REMARKS_OPTIONS = [
 ]
 
 type Screen = 'landing' | 'form' | 'success'
-type LandingMode = 'choose' | 'search'
+type LandingMode = 'choose' | 'search' | 'upload'
 
 function SearchableSelect({
   items,
@@ -207,10 +207,12 @@ export default function DCWorkflow() {
   const invInputRef = useRef<HTMLInputElement>(null)
   const corInputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
+  const reloadDirectory = useCallback(() => {
     fetch('/suppliers').then(r => r.json()).then(d => setSuppliers(d.suppliers ?? [])).catch(() => {})
     fetch('/employees').then(r => r.json()).then(d => setEmployees(d.employees ?? [])).catch(() => {})
   }, [])
+
+  useEffect(() => { reloadDirectory() }, [reloadDirectory])
 
   useEffect(() => {
     if (landingMode !== 'search') return
@@ -802,7 +804,7 @@ export default function DCWorkflow() {
   return (
     <div className="page">
       {warningModal}
-      <Header title="DC Checking & Verification" onBack={landingMode === 'search' ? () => setLandingMode('choose') : undefined} />
+      <Header title="DC Checking & Verification" onBack={landingMode !== 'choose' ? () => setLandingMode('choose') : undefined} />
       <div className="content">
 
         {landingMode === 'choose' && (
@@ -827,7 +829,36 @@ export default function DCWorkflow() {
               <span className="hub-sub">Look up</span>
               <span className="hub-title">Find DC</span>
             </button>
+            <button className="hub-card" onClick={() => setLandingMode('upload')} style={{ font: 'inherit', gridColumn: '1 / -1' }}>
+              <div className="hub-icon-wrap" style={{ background: '#fef3c7', color: '#b45309' }}>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+              </div>
+              <span className="hub-sub">Bulk import</span>
+              <span className="hub-title">Update Employees & Suppliers</span>
+            </button>
           </div>
+        )}
+
+        {landingMode === 'upload' && (
+          <>
+            <FileUploadCard
+              title="Suppliers"
+              hint="CSV with a &quot;Supplier Name&quot; column (or one name per row)"
+              endpoint="/suppliers/upload"
+              onSuccess={reloadDirectory}
+            />
+            <FileUploadCard
+              title="Employees"
+              hint="CSV with an &quot;Employee Name&quot; column (or one name per row)"
+              endpoint="/employees/upload"
+              onSuccess={reloadDirectory}
+            />
+          </>
         )}
 
         {landingMode === 'search' && (
@@ -923,6 +954,85 @@ function Header({ title, onBack }: { title: string; onBack?: () => void }) {
       )}
       <h1>{title}</h1>
     </header>
+  )
+}
+
+interface UploadResult { total_in_file: number; added: number; skipped_duplicates: number }
+
+function FileUploadCard({
+  title,
+  hint,
+  endpoint,
+  onSuccess,
+}: {
+  title: string
+  hint: string
+  endpoint: string
+  onSuccess: () => void
+}) {
+  const [dragOver, setDragOver] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [result, setResult] = useState<UploadResult | null>(null)
+  const [error, setError] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const doUpload = async (file: File) => {
+    setUploading(true); setError(''); setResult(null)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch(endpoint, { method: 'POST', body: fd })
+      const d = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(d.detail ?? `Error ${res.status}`)
+      setResult(d)
+      onSuccess()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleFiles = (files: FileList | null) => {
+    const file = files?.[0]
+    if (file) doUpload(file)
+  }
+
+  return (
+    <div className="card" style={{ marginBottom: 14 }}>
+      <div className="card-header">{title}</div>
+      <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <input ref={inputRef} type="file" accept=".csv,text/csv" style={{ display: 'none' }}
+          onChange={e => { handleFiles(e.target.files); e.target.value = '' }} />
+        <button
+          className="upload-area"
+          onClick={() => inputRef.current?.click()}
+          onDragOver={e => { e.preventDefault(); setDragOver(true) }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={e => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files) }}
+          style={dragOver ? { borderColor: 'var(--accent)', background: 'var(--accent-light)' } : undefined}
+        >
+          <svg className="upload-icon" width="28" height="28" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <p>{uploading ? 'Uploading…' : 'Drop or click to upload .csv'}</p>
+          <span className="upload-hint">{hint}</span>
+        </button>
+        {result && (
+          <div className="banner banner-success">
+            Added {result.added} new / {result.total_in_file} in file
+            {result.skipped_duplicates > 0 && ` (${result.skipped_duplicates} already on file)`}
+          </div>
+        )}
+        {error && <div className="banner banner-error">{error}</div>}
+        <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+          Existing names are left untouched — only new ones get added.
+        </p>
+      </div>
+    </div>
   )
 }
 

@@ -1,5 +1,5 @@
 .env
-backend/staff_names.txt
+backend/staff_names.csv
 backend/venv/
 backend/__pycache__/
 **/__pycache__/

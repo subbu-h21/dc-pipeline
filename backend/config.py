@@ -29,15 +29,21 @@ STAGE3_SUPPLIER_CSV: str = os.getenv(
     "../supplier_names.csv",
 )
 
-STAFF_NAMES_FILE: str = os.getenv("STAFF_NAMES_FILE", "./staff_names.txt")
+STAFF_NAMES_FILE: str = os.getenv("STAFF_NAMES_FILE", "./staff_names.csv")
 
 
 def load_staff_names() -> list[str]:
     if not os.path.exists(STAFF_NAMES_FILE):
         log.warning("Staff names file not found at %s", STAFF_NAMES_FILE)
         return []
-    with open(STAFF_NAMES_FILE, encoding="utf-8") as f:
-        return [line.strip() for line in f if line.strip()]
+    names: list[str] = []
+    with open(STAFF_NAMES_FILE, newline="", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            name = _html.unescape(row.get("Employee Name", "")).strip()
+            if name:
+                names.append(name)
+    log.info("Loaded %d staff names from CSV", len(names))
+    return sorted(names, key=str.upper)
 
 
 def load_supplier_names() -> list[str]:
