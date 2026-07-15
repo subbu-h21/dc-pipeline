@@ -23,7 +23,6 @@ if not exist .env (
     echo Created backend\.env from .env.example
     echo.
     echo  IMPORTANT: Open backend\.env and fill in your settings before running the app.
-    echo  - STAGE3_SUPPLIER_CSV  ^(path to the shared supplier CSV^)
     echo  - STAGE3_URL           ^(only if Stage 3 runs somewhere other than http://localhost:5173^)
     echo  - DASHBOARD_PIN
     echo  - OPENROUTER_API_KEY   ^(for invoice extraction^)
